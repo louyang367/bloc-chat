@@ -1,18 +1,59 @@
 .App nav {
   position: fixed;
-  width: 25%;
+  width: 30%;
   height: 100%;
   background-color: lightgrey;
   padding-left: 2em;
   padding-top: 1em;
 }
 
-.RoomList {
+.RoomList ul {
   display: block;
   list-style-type: none;
   padding-left: 0;
+  margin-top: 25%;
 }
 
 .RoomList li {
   line-height: 2em;
+}
+
+.App nav .App-title {
+  position: absolute;
+  left: 10%;
+  top: 5%;
+  margin: 0;
+}
+.RoomList #newRoom {
+  position: absolute;
+  top: 5%;
+  left: 55%;
+  padding: 5px;
+  width: 30%;
+}
+
+.RoomList #formToCreateRoom {
+  display: none;
+  position: fixed;
+  top: 20%;
+  left: 35%;
+  width: 35%;
+  background-color: lightgrey;
+  padding: 20px;
+}
+#formToCreateRoom fieldset{
+  border: none;
+}
+
+#formToCreateRoom label>input{
+  display: block;
+  width: 95%;
+  padding: 7px;
+  margin-bottom: 10px;
+}
+
+.RoomList .buttons button{
+  width: 46%;
+  margin: 5px;
+  padding: 7px;
 }

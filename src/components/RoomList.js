@@ -34,10 +34,14 @@ class RoomList extends Component {
 
   createRoom(e){
     const val = (document.forms['formToCreateRoom']['inputRoomName'].value);
-    const newRef = this.roomsRef.push();
-    newRef.set(val);
-    this.modal.style.display = "block";
-    e.preventDefault(); /* form remains until cancel button is clicked */
+    if (val===null || val.length===0 || val.trim()===null) {
+      alert("Please enter a valid name.");
+      this.modal.style.display = "block";
+      e.preventDefault(); } /* can be used to persist modal until cancel button is clicked */
+    else {
+      const newRef = this.roomsRef.push();
+      newRef.set(val);
+    }
   }
 
   handleNewRoomClick(){
@@ -48,14 +52,24 @@ class RoomList extends Component {
     this.modal.style.display = "none";
   }
 
+  styleRoom(room){
+    const highLight = {backgroundColor:'darkGray', color:'white'};
+    const plain = {backgroundColor:'lightgray', color:'black'};
+
+    if (this.props.currentRoom!=null && room.key===this.props.currentRoom.key)
+      return <li key={room.key} onClick={()=>this.props.setCurrentRoom(room)} style={highLight}>{room.value}</li>
+    else {
+      return <li key={room.key} onClick={()=>this.props.setCurrentRoom(room)}  style={plain}>{room.value}</li>;
+    }
+  }
+
   render(){
     return (
       <div className = {this.props.className}>
         {/* list of existing rooms */}
         <ul>
           {
-            this.state.rooms.map( (room, index) =>
-            <li key={room.key}>{room.value}</li>
+            this.state.rooms.map( (room) => this.styleRoom(room)
           )}
         </ul>
         {/* button to create new room */}

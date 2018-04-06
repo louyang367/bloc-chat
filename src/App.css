@@ -83,3 +83,25 @@ main {
   margin: 0;
   margin-right: 2em;
 }
+
+.App footer .User{
+  position: fixed;
+  bottom: 1%;
+  height: 15%;
+  width: 100%;
+  border-top: darkGray groove 2px;
+  border-bottom: darkGray groove 2px;
+}
+
+.User p {
+  margin-left: 5%;
+}
+.User h3 {
+  margin-left: 5%;
+}
+.User button{
+  margin-left: 5%;
+  width: 15%;
+  height: 3em;
+  font-size: 1em;
+}

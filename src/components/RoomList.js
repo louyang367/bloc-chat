@@ -46,6 +46,7 @@ class RoomList extends Component {
 
   handleNewRoomClick(){
     this.modal.style.display = "block";
+    this.modal.style.zIndex = 1;
   }
 
   handleCloseNewRoomClick(){
@@ -66,12 +67,7 @@ class RoomList extends Component {
   render(){
     return (
       <div className = {this.props.className}>
-        {/* list of existing rooms */}
-        <ul>
-          {
-            this.state.rooms.map( (room) => this.styleRoom(room)
-          )}
-        </ul>
+        <h1 className="App-title">Bloc Chat</h1>
         {/* button to create new room */}
         <button type='button' name='New room' id='newRoom' onClick={()=>this.handleNewRoomClick()}>New room</button>
         {/* form to enter new room name. No checkin for duplication. Must click 'cancel' to close */}
@@ -87,6 +83,12 @@ class RoomList extends Component {
             </div>
           </fieldset>
         </form>
+        {/* list of existing rooms */}
+        <ul>
+          {
+            this.state.rooms.map( (room) => this.styleRoom(room)
+          )}
+        </ul>
       </div>
     );
   }

@@ -13,7 +13,7 @@ class User extends Component {
     firebase.auth().signOut().then( ()=> {
       // firebase.auth().onAuthStateChanged catches all user changes and calls setUser() anyway
       //this.props.setUser(null);
-    }).catch(function(error) {
+    }).catch((error)=>{
       alert('Sign out error: '+error.message);
     });
   }
@@ -23,7 +23,7 @@ class User extends Component {
     firebase.auth().signInWithPopup(provider).then( (result)=> {
       // firebase.auth().onAuthStateChanged catches all user changes and calls setUser() anyway
       //this.props.setUser(result.user);
-    }).catch(function(error) {
+    }).catch((error)=>{
       alert(`Sign in error: errorCode=${error.code} errorMessage=${error.message} email=${error.email} credential=${error.credential}`);
     });
   }

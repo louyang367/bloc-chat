@@ -41,7 +41,6 @@ class App extends Component {
         <header className="App-header">
         </header>
         <nav>
-          <h1 className="App-title">Bloc Chat</h1>
           <RoomList className='RoomList'
             firebase={firebase}
             currentRoom={this.state.currentRoom}
@@ -50,7 +49,9 @@ class App extends Component {
         <main>
           <MessageList className='MessageList'
             firebase={firebase}
-            currentRoom={this.state.currentRoom} />
+            currentRoom={this.state.currentRoom}
+            currentUser={this.state.currentUser}
+            />
         </main>
         <footer>
           <User className="User"

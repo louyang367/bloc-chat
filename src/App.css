@@ -34,7 +34,7 @@
   padding-left: 1em;
 }
 
-.RoomList #formToCreateRoom {
+.RoomList #formToCreateRoom, .RoomList #formToRenameRoom {
   position: fixed;
   display: none;
   top: 20%;
@@ -44,11 +44,11 @@
   border: black solid 1px;
   padding: 20px;
 }
-#formToCreateRoom fieldset{
+#formToCreateRoom fieldset, #formToRenameRoom fieldset{
   border: none;
 }
 
-#formToCreateRoom label>input{
+#formToCreateRoom label>input, #formToRenameRoom label>input{
   display: block;
   width: 95%;
   padding: 7px;
@@ -137,17 +137,9 @@ main .newMessage{
 }
 
 .User p {
-  /*position: absolute;
-  margin-top: 5%;
-  margin-left: 5%;*/
   text-align: center;
-
 }
 .User h3 {
-  /*position: absolute;
-  margin-left: 10%;
-  margin-top: 15%;
-  margin-bottom: 1.5%;*/
   text-align: center;
 
 }
@@ -157,4 +149,25 @@ main .newMessage{
   width: 45%;
   height: 2em;
   font-size: 1em;
+}
+
+/* right-click menu */
+#contextRoom {
+  display: none;
+    z-index:1000;
+    position: fixed;
+    width: 10%;
+    background-color:white;/*#C0C0C0;*/
+    border: 2px ridge silver;
+    padding: 5px;
+    margin: 0;
+    list-style-type: none;
+    list-style: none;
+  /*  width: 10%;
+    height: 20%;*/
+    overflow: auto;
+}
+
+#contextRoom li{
+  display: block;
 }

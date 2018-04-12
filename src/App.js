@@ -28,14 +28,20 @@ class App extends Component {
   }
 
   setCurrentRoom(currentRoom){
-    this.setState( {currentRoom: currentRoom} );
-  }
+    if (currentRoom !== this.state.currentRoom) {
+        //console.log('app.js:setCurrentRoom: '+currentRoom)
+        this.setState( {currentRoom: currentRoom} );
+      }
+    }
 
   setUser(user){
-    this.setState( {currentUser: user} );
+    if (user !== this.state.currentUser) {
+      this.setState( {currentUser: user} );
+    }
   }
 
   render() {
+    //console.log("app.js render: currentRoom="+this.state.currentRoom+', currentUser='+this.state.currentUser);
     return (
       <div className="App">
         <header className="App-header">

@@ -112,7 +112,7 @@ class RoomList extends Component {
     this.contextMenuForRoom.style.display = 'none';
   }
 
-  mouseX(evt) {
+  static mouseX(evt, document) {
     if (evt.pageX) {
       return evt.pageX; }
     else if (evt.clientX) {
@@ -123,7 +123,7 @@ class RoomList extends Component {
       return null; }
   }
 
-  mouseY(evt) {
+  static mouseY(evt, document) {
     if (evt.pageY) {
       return evt.pageY; }
     else if (evt.clientY) {
@@ -138,8 +138,8 @@ class RoomList extends Component {
     e.preventDefault();
     this.props.setCurrentRoom(room);
     this.contextMenuForRoom.style.display = "block";
-    this.contextMenuForRoom.style.top =  this.mouseY(e) + 'px';
-    this.contextMenuForRoom.style.left =  this.mouseX(e) + 'px';
+    this.contextMenuForRoom.style.top =  this.mouseY(e, document) + 'px';
+    this.contextMenuForRoom.style.left =  this.mouseX(e, document) + 'px';
   }
 
   hiliteRoom(room, index){

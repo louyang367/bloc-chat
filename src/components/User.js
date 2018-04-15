@@ -1,32 +1,56 @@
 import React, { Component } from 'react';
-import * as firebase from 'firebase';
+//import * as firebase from 'firebase';
 
 class User extends Component {
+  constructor(props) {
+    super(props);
+    //this.userRef = this.props.firebase.ref('signedInUsers');
+  }
 
   componentDidMount() {
-    this.props.firebase.auth().onAuthStateChanged( user => {
+    this.props.firebase.auth().onAuthStateChanged( (user) => {
+      if (user) {
+        console.log('onAuthStateChanged: '+user.displayName+'signed in');
+        const ref = this.props.firebase.database().ref('signedInUsers/'+user.uid);
+        ref.child('isTyping').set('false').catch((error)=>{
+          alert('onAuthStateChanged: '+error.message);
+        })
+      }
+      else {
+        console.log('onAuthStateChanged: '+this.props.currentUser.displayName+'signed out');
+        this.props.firebase.database().ref('signedInUsers/'+this.props.currentUser.uid).remove().catch((error)=>{
+          alert('onAuthStateChanged: '+error.message);
+        })
+      }
       this.props.setUser(user);
     });
   }
 
   handleSignOut() {
-    firebase.auth().signOut().then( ()=> {
+    console.log('in handleSignOut!');
+    this.props.firebase.auth().signOut().then( ()=> {
+      console.log('handleSignOut succeeded');
       // firebase.auth().onAuthStateChanged catches all user changes and calls setUser() anyway
-      //this.props.setUser(null);
     }).catch((error)=>{
       alert('Sign out error: '+error.message);
     });
   }
 
   handleSignIn() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithPopup(provider).then( (result)=> {
-      // firebase.auth().onAuthStateChanged catches all user changes and calls setUser() anyway
-      //this.props.setUser(result.user);
-    }).catch((error)=>{
-      alert(`Sign in error: errorCode=${error.code} errorMessage=${error.message} email=${error.email} credential=${error.credential}`);
-    });
-  }
+    const provider = new this.props.firebase.auth.GoogleAuthProvider();
+
+    this.props.firebase.auth().setPersistence(this.props.firebase.auth.Auth.Persistence.SESSION)
+      .then(()=> {
+        this.props.firebase.auth().signInWithPopup(provider).then( (result)=> {
+          // firebase.auth().onAuthStateChanged catches all user changes and calls setUser() anyway
+        }).catch((error)=>{
+          alert(`Sign in error: errorMessage=${error.message} email=${error.email} credential=${error.credential}`);
+        });
+      })
+    .catch((error)=> {
+      alert('setPersistence error: '+error:message);
+      });
+    }
 
   render(){
     if (this.props.currentUser === null)

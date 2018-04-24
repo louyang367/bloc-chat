@@ -7,6 +7,7 @@ class MessageList extends Component {
     super(props);
     this.state = {
       messages: [],
+      currentRoom: this.props.currentRoom
     };
     this.messageRef = this.props.firebase.database().ref('Messages');
     this.onlineRef = this.props.firebase.database().ref('signedInUsers');
@@ -14,16 +15,91 @@ class MessageList extends Component {
     this.contextMenuForMsg = null;
     this.currentMsg = null;
     this.currentList = null;
-    this.listofOnline = [];
+    this.onlineStatusRecords = [];
     this.isTypingNew = false;
   }
 
   componentDidMount() {
     document.addEventListener('click', (e)=>{this.clicktoClose(e)});
+    // set listener for users' online status
+    this.onlineRef.on('value', (snapshot) => {
+      var changed = false;
+      var messages = this.state.messages.slice(0);
+      this.onlineStatusRecords = snapshot.val();
+      changed = this.updateOnlineStatus(messages);
+      //console.log('Changed='+changed);
+      if (changed) this.setState({ messages: messages });
+    })
+  }
 
-    this.messageRef.on('value', (snapshot) => {
-      //console.log('child_added triggered! snapshot=' +snapshot.val().content);
-      let messages = [];
+  updateOnlineStatus(messages){
+    var changed = false;
+    var listofOnline = this.onlineStatusRecords!==null? Object.keys(this.onlineStatusRecords) : [];
+    //console.log('in updateOnlineStatus: listofOnline='+listofOnline);
+
+    for (let index in messages){
+      //console.log('msg="'+messages[index].value.content+'" room='+messages[index].value.roomId);
+      let foundIndex = listofOnline.indexOf(messages[index].value.uid);
+      if ( foundIndex >=0) {
+        //console.log('found the message author in the user-online list '+messages[index].value.username);
+        if (messages[index].isOnline === false) {
+          //console.log('This message author was not online')
+          messages[index].isOnline = true;
+          messages[index].isTyping = this.onlineStatusRecords[listofOnline[foundIndex]].isTyping;;
+          changed = true;
+        }
+        else if (messages[index].isTyping !== this.onlineStatusRecords[listofOnline[foundIndex]].isTyping) {
+          //console.log(`Typing status diff: messages[${index}].isTyping=${messages[index].isTyping}`);
+          //console.log(`Typing status diff: records[listofOnline[${foundIndex}]].isTyping=${this.onlineStatusRecords[listofOnline[foundIndex]].isTyping}`);
+          messages[index].isTyping = this.onlineStatusRecords[listofOnline[foundIndex]].isTyping;
+          changed = true;
+        }
+      } else {
+        //console.log('Msg author not on the online list!');
+        if (messages[index].isOnline === true) {
+          //console.log('...And he was online before...')
+          messages[index].isOnline = false;
+          messages[index].isTyping = 'false';
+          changed = true;
+        }
+      }
+    }
+  return changed;
+  }
+
+  componentWillUnmount() {
+    this.messageRef.off('value');
+    this.onlineRef.off('value');
+    document.removeEventListener('click', (e)=>{this.clicktoClose(e)});
+  }
+
+  //static getDerivedStateFromProps(nextProps, prevState) {
+  componentDidUpdate(prevProps, prevState) {
+    //console.log('in componentDidUpdate: thisState.msgs='+this.State.messages.toString())
+    if (this.state.currentRoom !== this.props.currentRoom) {
+      this.messageRef.off('value');
+      let newState = {
+        messages: [],
+        currentRoom: this.props.currentRoom
+      };
+      if (this.props.currentRoom === null)
+        this.setState(newState);
+      else {
+        this.messageRef.orderByChild('roomId').equalTo(this.props.currentRoom.key).on('value', (snapshot)=>{
+        //console.log('value triggered! currRoom='+this.props.currentRoom.value);
+          newState = {
+            messages: [],
+            currentRoom: this.props.currentRoom
+          };
+          this.loadCurrRoom(snapshot, newState.messages);
+          if (newState.messages.length > 0) this.updateOnlineStatus(newState.messages);
+          this.setState(newState);
+        })
+      }
+    }
+  }
+
+  loadCurrRoom(snapshot, messages){
       const msgsObj = snapshot.val();
       for (let msgId in msgsObj){
         const msg = {
@@ -34,54 +110,7 @@ class MessageList extends Component {
         }
         messages.push(msg);
       }
-      this.setState({ messages: messages });
-    })
-
-    this.onlineRef.on('value', (snapshot) => {
-      var changed = false;
-      var messages = this.state.messages.slice(0);
-
-      const records = snapshot.val();
-
-      this.listofOnline = Object.keys(records);
-
-      for (let index in this.state.messages){
-        //console.log('msg="'+this.state.messages[index].value.content+'" room='+this.state.messages[index].value.roomId);
-        let foundIndex = this.listofOnline.indexOf(this.state.messages[index].value.uid);
-        if ( foundIndex >=0) {
-          //console.log('Found user! '+this.state.messages[index].value.username);
-          if (this.state.messages[index].isOnline === false) {
-            //console.log('He was not online')
-            messages[index].isOnline = true;
-            messages[index].isTyping = 'false';
-            changed = true;
-          }
-          else if (this.state.messages[index].isTyping !== records[this.listofOnline[foundIndex]].isTyping) {
-            //console.log(`messages[${index}].isTyping=${this.state.messages[index].isTyping}`);
-            //console.log(`records[this.listofOnline[${foundIndex}]].isTyping=${records[this.listofOnline[foundIndex]].isTyping}`);
-
-            messages[index].isTyping = records[this.listofOnline[foundIndex]].isTyping;
-            changed = true;
-          }
-        } else {
-          //console.log('User not on the online list!');
-          if (this.state.messages[index].isOnline === true) {
-            //console.log('...And he was online before...')
-            messages[index].isOnline = false;
-            messages[index].isTyping = 'false';
-            changed = true;
-          }
-        }
-      }
-      console.log('Changed='+changed);
-      if (changed) this.setState({ messages: messages });
-    })
-  }
-
-  componentWillUnmount() {
-    this.messageRef.off('value');
-    document.removeEventListener('click', (e)=>{this.clicktoClose(e)});
-  }
+    }
 
   handleTextareaClick(){
     if (this.props.currentRoom === null || this.props.currentUser === null)
@@ -102,6 +131,8 @@ class MessageList extends Component {
       return;
     } else if (this.props.currentUser === null) {
       alert("You have to sign in to post a message.");
+      return;
+    } else if (this.input.value.trim() === '') {
       return;
     }
     //clicktoClose() has already cleared the screen
@@ -150,7 +181,9 @@ class MessageList extends Component {
     //remove old selection's border
     if (this.currentList != null)
       this.currentList.style.border = 'none';
-    this.currentList = e.target.parentElement;
+    if (e.target.tagName === 'LI') this.currentList = e.target;
+    else if (e.target.tagName === 'P') this.currentList = e.target.parentElement;
+    else if (e.target.tagName === ('SPAN'||'DIV')) this.currentList = e.target.parentElement.parentElement;
   }
 
   validateAction(){
@@ -174,7 +207,7 @@ class MessageList extends Component {
       .then(()=>{
         console.log("Remove succeeded.");
         this.currentMsg = null;})
-      .catch(error=>{console.log(error.message)});
+      .catch(error=>{alert('delete message error: '+error.message)});
     // remove context menu no matter what
     this.contextMenuForMsg.style.display = 'none';
   }
@@ -198,13 +231,13 @@ class MessageList extends Component {
       //console.log('1.............');
       this.contextMenuForMsg.style.display = 'none';
     }
-    else if (this.isTypingNew && e.target !== this.input){
+    else if (this.isTypingNew && e.target !== this.input && this.props.currentUser !== null){
       const ref = this.props.firebase.database().ref('signedInUsers/'+this.props.currentUser.uid);
       ref.child('isTyping').set('false').then(()=>{
         this.isTypingNew = false;
       })
       .catch((error)=>{
-        alert(`Setting isTyping false error: errorMessage=${error.message} email=${error.email} credential=${error.credential}`);
+        alert(`Setting isTyping false: errorMessage=${error.message} email=${error.email} credential=${error.credential}`);
       });
     }
     //Clicking outside textarea and not the selected msg exits edit mode
@@ -215,7 +248,7 @@ class MessageList extends Component {
       this.currentList.style.border = 'none';
       this.contextMenuForMsg.style.display = 'none';
     }
-    // clicking anywhere else when context menu is on closes the menu
+    //clicking anywhere else when context menu is on closes the menu
     else if (this.contextMenuForMsg && this.contextMenuForMsg.style.display !== 'none'){
       //console.log('3..........');
       this.contextMenuForMsg.style.display = 'none';
@@ -223,33 +256,42 @@ class MessageList extends Component {
   }
 
   hiliteName(msg){
-    /*if (msg.isOnline) return <p id='username' style={{color:'green'}}>{msg.value.username}<span className='ion-log-in'></span></p>
-    else return <p id='username' style={{color:'red'}}>{msg.value.username}</p>*/
-    const textIsTyping = (msg.isTyping==='true')?' is typing...':'';
-    if (msg.isOnline) {
-      return <p><span id='username' style={{color:'green'}}>{msg.value.username}</span><span style={{color:'gray',fontStyle:'Italic'}}>{textIsTyping}</span></p>
+    if (msg.isOnline && msg.isTyping==='true') {
+      return (
+        <p className='msgHeader'>
+          <span className='username' style={{color:'green'}}>{msg.value.username}<span className="tooltiptext">User is online</span></span>
+          <div className='isTyping' style={{color:'gray',fontStyle:'Italic'}}> is typing......... </div>
+          <span className='sentat'>{new Date(msg.value.sentAt).toLocaleDateString() +' '+ new Date(msg.value.sentAt).toLocaleTimeString()}</span>
+        </p>)
     }
-    else return <p id='username' style={{color:'red'}}>{msg.value.username}</p>
+    else if (msg.isOnline && msg.isTyping!=='true') {
+      return (
+        <p className='msgHeader'>
+          <span className='username' style={{color:'green'}}>{msg.value.username}<span className="tooltiptext">User is online</span></span>
+          <span className='sentat'>{new Date(msg.value.sentAt).toLocaleDateString() +' '+ new Date(msg.value.sentAt).toLocaleTimeString()}</span>
+        </p>)
+    }
+    else return (
+      <p className='msgHeader'>
+        <span className='username' style={{color:'purple'}}>{msg.value.username}<span className="tooltiptext">User is offline</span></span>
+        <span className='sentat'>{new Date(msg.value.sentAt).toLocaleDateString() +' '+ new Date(msg.value.sentAt).toLocaleTimeString()}</span>
+      </p>)
   }
 
   render(){
     //li don't need ref since onContextMenu has e.target
-    //ref={(list)=>{this.currentMsg=msg; this.currentList=list}}>
-
+    //console.log('in render(): msgs='+this.state.messages.toString());
     return (
       <div>
       <section className = {this.props.className}>
         <h3>{this.props.currentRoom===null?'':this.props.currentRoom.value}</h3>
-        <ul>
+        <ul id='msgProper'>
           {
-            this.state.messages.filter((msg)=>this.props.currentRoom!=null
-            && msg.value.roomId===this.props.currentRoom.key).map( (msg) =>
+            this.state.messages.map( (msg) =>
             <li key={msg.key} tabIndex="0"
               onContextMenu= {(e)=>this.handleMsgContext(e, msg)}>
-              {this.hiliteName(msg)}
-              <span id='content'>{msg.value.content}</span>
-              <span id='sentat'>{new Date(msg.value.sentAt).toLocaleDateString() +' '
-                + new Date(msg.value.sentAt).toLocaleTimeString()}</span>
+              {this.hiliteName(msg)}<br></br>
+              <p className='content'>{msg.value.content}</p>
             </li>)
           }
         </ul>

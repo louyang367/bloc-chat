@@ -8,12 +8,12 @@ import User from './components/User';
 
   // Initialize Firebase
   var config = {
-    apiKey: "AIzaSyBZlFvW0Gq4iAR5Uux7Jn2NKEAkAKyyl3s",
-    authDomain: "bloc-chat-2db5d.firebaseapp.com",
-    databaseURL: "https://bloc-chat-2db5d.firebaseio.com",
-    projectId: "bloc-chat-2db5d",
-    storageBucket: "bloc-chat-2db5d.appspot.com",
-    messagingSenderId: "402057190456"
+    apiKey: "AIzaSyDufSUU-vMxMs3K2RM4b1Xez-pluR_hA4c",
+    authDomain: "bloc-chat-b182c.firebaseapp.com",
+    databaseURL: "https://bloc-chat-b182c.firebaseio.com",
+    projectId: "bloc-chat-b182c",
+    storageBucket: "",
+    messagingSenderId: "984059359623"
   };
   firebase.initializeApp(config);
 

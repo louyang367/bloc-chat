@@ -138,12 +138,12 @@ class RoomList extends Component {
     e.preventDefault();
     this.props.setCurrentRoom(room);
     this.contextMenuForRoom.style.display = "block";
-    this.contextMenuForRoom.style.top =  this.mouseY(e, document) + 'px';
-    this.contextMenuForRoom.style.left =  this.mouseX(e, document) + 'px';
+    this.contextMenuForRoom.style.top =  RoomList.mouseY(e, document) + 'px';
+    this.contextMenuForRoom.style.left =  RoomList.mouseX(e, document) + 'px';
   }
 
   hiliteRoom(room, index){
-    const highLight = {backgroundColor:'darkGray', color:'white'};
+    const highLight = {backgroundColor:'#c9ddfc', color:'black',borderStyle:'groove',borderColor:'c9ddfc',borderLeft:'None',borderRight:'none'};//#4284F9
     const plain = {backgroundColor:'lightgray', color:'black'};
     if (this.props.currentRoom!=null && room.key===this.props.currentRoom.key)
       return <li key={room.key} onClick={()=>this.props.setCurrentRoom(room)}
@@ -187,7 +187,7 @@ class RoomList extends Component {
           </fieldset>
         </form>
         {/* list of existing rooms */}
-        <ul>
+        <ul id='roomsProper'>
           {
             this.state.rooms.map( (room, index) => this.hiliteRoom(room, index)
           )}
